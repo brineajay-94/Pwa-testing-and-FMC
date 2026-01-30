@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My PWA</title>
+  <title>My PWA with Notifications</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -48,17 +48,14 @@
 <div class="app">
 
   <header>
-    <h1>
-      <span class="material-icons-outlined">rocket_launch</span>
-      My PWA
-    </h1>
-    <p>Fast • Offline • Installable</p>
+    <h1><span class="material-icons-outlined">rocket_launch</span>My PWA</h1>
+    <p>Fast • Offline • Notifications Enabled</p>
   </header>
 
   <main>
     <div class="card">
       <h2><span class="material-icons-outlined">home</span>Welcome</h2>
-      <p>This is a Progressive Web App with a clean, professional UI.</p>
+      <p>This is a Progressive Web App with Firebase push notifications!</p>
     </div>
 
     <div class="card">
@@ -66,7 +63,7 @@
       <ul>
         <li><span class="material-icons-outlined">bolt</span> Fast loading</li>
         <li><span class="material-icons-outlined">cloud_off</span> Offline support</li>
-        <li><span class="material-icons-outlined">install_mobile</span> Installable experience</li>
+        <li><span class="material-icons-outlined">notifications_active</span> Push Notifications</li>
       </ul>
     </div>
   </main>
@@ -78,43 +75,67 @@
 
 </div>
 
-<script>
-  // -------------------------
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
+
+  // Your Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPSfmHJwV_1MNNeBF3obnpWaK0jDea6lE",
+    authDomain: "dev-a-3cf61.firebaseapp.com",
+    databaseURL: "https://dev-a-3cf61-default-rtdb.firebaseio.com",
+    projectId: "dev-a-3cf61",
+    storageBucket: "dev-a-3cf61.firebasestorage.app",
+    messagingSenderId: "523395724429",
+    appId: "1:523395724429:web:83bfb8a4077442ef611ec4",
+    measurementId: "G-T2FL9C69S7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const messaging = getMessaging(app);
+
   // Register Service Worker
-  // -------------------------
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('✅ Service Worker registered'));
-    });
+  if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+      .then(registration => console.log("✅ FCM SW registered"))
+      .catch(err => console.error("❌ FCM SW error:", err));
   }
 
-  // -------------------------
-  // Ask Notification Permission
-  // -------------------------
+  // Ask notification permission on page load
   window.addEventListener('load', async () => {
-    // Only request if notifications supported
-    if (!('Notification' in window)) {
-      console.log('This browser does not support notifications.');
-      return;
-    }
-
-    // Check if permission already granted
-    if (Notification.permission === 'default') {
-      try {
-        const permission = await Notification.requestPermission();
-        console.log('Notification permission:', permission);
-        if(permission === 'granted') {
-          alert('Notifications enabled! ✅');
-        } else if(permission === 'denied') {
-          alert('Notifications denied ❌');
-        }
-      } catch (err) {
-        console.error('Error requesting notification permission:', err);
+    if(Notification.permission === 'default') {
+      const permission = await Notification.requestPermission();
+      if(permission === 'granted') {
+        alert('Notifications enabled! ✅');
+      } else {
+        alert('Notifications denied ❌');
       }
-    } else {
-      console.log('Notification permission already:', Notification.permission);
     }
+  });
+
+  // Get FCM token
+  async function getFCMToken() {
+    try {
+      const token = await getToken(messaging, {
+        vapidKey: "YOUR_PUBLIC_VAPID_KEY" // <-- Replace this with your Web Push key
+      });
+      if(token) {
+        console.log("🔥 FCM Token:", token);
+        // Send this token to your backend to send push notifications
+      } else {
+        console.log("No token available. Request permission first.");
+      }
+    } catch(err) {
+      console.error("Error getting FCM token:", err);
+    }
+  }
+
+  getFCMToken();
+
+  // Handle foreground messages
+  onMessage(messaging, (payload) => {
+    console.log("Foreground message:", payload);
+    alert(`Foreground notification: ${payload.notification.title} - ${payload.notification.body}`);
   });
 </script>
 
