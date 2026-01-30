@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My PWA</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4f46e5">
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+  <!-- Embedded CSS -->
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #6366f1;
+      --bg: #f4f6ff;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin:0; padding:0; font-family:system-ui,sans-serif; }
+
+    body { background: linear-gradient(180deg, var(--bg), #ffffff); color: var(--text); min-height:100vh; }
+    .app { max-width:480px; margin:auto; min-height:100vh; display:flex; flex-direction:column; }
+
+    header { padding:24px; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:#fff; border-bottom-left-radius:24px; border-bottom-right-radius:24px; }
+    header h1 { font-size:1.8rem; display:flex; align-items:center; gap:8px; }
+    header p { opacity:0.9; margin-top:6px; }
+
+    main { flex:1; padding:20px; display:grid; gap:16px; }
+    .card { background: var(--card); padding:18px; border-radius: var(--radius); box-shadow:0 10px 25px rgba(0,0,0,0.06); }
+    .card h2 { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+    .card p, .card li { color: var(--muted); font-size:0.95rem; }
+    .card ul { list-style:none; display:grid; gap:10px; margin-top:10px; }
+    .card li { display:flex; align-items:center; gap:10px; }
+
+    footer { padding:14px; text-align:center; font-size:0.85rem; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:6px; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <header>
+    <h1>
+      <span class="material-icons-outlined">rocket_launch</span>
+      My PWA
+    </h1>
+    <p>Fast • Offline • Installable</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2><span class="material-icons-outlined">home</span>Welcome</h2>
+      <p>This is a Progressive Web App with a clean, professional UI.</p>
+    </div>
+
+    <div class="card">
+      <h2><span class="material-icons-outlined">auto_awesome</span>Features</h2>
+      <ul>
+        <li><span class="material-icons-outlined">bolt</span> Fast loading</li>
+        <li><span class="material-icons-outlined">cloud_off</span> Offline support</li>
+        <li><span class="material-icons-outlined">install_mobile</span> Installable experience</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <span class="material-icons-outlined">copyright</span>
+    2026 My PWA App
+  </footer>
+
+</div>
+
+<script>
+  // -------------------------
+  // Register Service Worker
+  // -------------------------
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker registered'));
+    });
+  }
+
+  // -------------------------
+  // Ask Notification Permission
+  // -------------------------
+  window.addEventListener('load', async () => {
+    // Only request if notifications supported
+    if (!('Notification' in window)) {
+      console.log('This browser does not support notifications.');
+      return;
+    }
+
+    // Check if permission already granted
+    if (Notification.permission === 'default') {
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
+        if(permission === 'granted') {
+          alert('Notifications enabled! ✅');
+        } else if(permission === 'denied') {
+          alert('Notifications denied ❌');
+        }
+      } catch (err) {
+        console.error('Error requesting notification permission:', err);
+      }
+    } else {
+      console.log('Notification permission already:', Notification.permission);
+    }
+  });
+</script>
+
+</body>
+</html>
