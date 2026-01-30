@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My PWA with Notifications</title>
+  <title>My PWA with FCM</title>
 
-  <!-- PWA -->
+  <!-- Manifest -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4f46e5">
 
   <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
-  <!-- Embedded CSS -->
+  <!-- CSS -->
   <style>
     :root {
       --primary: #4f46e5;
@@ -23,33 +23,27 @@
       --muted: #6b7280;
       --radius: 16px;
     }
-
-    * { box-sizing: border-box; margin:0; padding:0; font-family:system-ui,sans-serif; }
-
-    body { background: linear-gradient(180deg, var(--bg), #ffffff); color: var(--text); min-height:100vh; }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:system-ui,sans-serif; }
+    body { background: linear-gradient(180deg, var(--bg), #fff); color: var(--text); min-height:100vh; }
     .app { max-width:480px; margin:auto; min-height:100vh; display:flex; flex-direction:column; }
-
-    header { padding:24px; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:#fff; border-bottom-left-radius:24px; border-bottom-right-radius:24px; }
-    header h1 { font-size:1.8rem; display:flex; align-items:center; gap:8px; }
+    header { padding:24px; background:linear-gradient(135deg,var(--primary),var(--secondary)); color:#fff; border-radius:24px 24px 0 0; }
+    header h1 { display:flex; align-items:center; gap:8px; font-size:1.8rem; }
     header p { opacity:0.9; margin-top:6px; }
-
     main { flex:1; padding:20px; display:grid; gap:16px; }
-    .card { background: var(--card); padding:18px; border-radius: var(--radius); box-shadow:0 10px 25px rgba(0,0,0,0.06); }
+    .card { background:var(--card); padding:18px; border-radius:var(--radius); box-shadow:0 10px 25px rgba(0,0,0,0.06); }
     .card h2 { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
     .card p, .card li { color: var(--muted); font-size:0.95rem; }
     .card ul { list-style:none; display:grid; gap:10px; margin-top:10px; }
     .card li { display:flex; align-items:center; gap:10px; }
-
     footer { padding:14px; text-align:center; font-size:0.85rem; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:6px; }
   </style>
 </head>
 
 <body>
 <div class="app">
-
   <header>
     <h1><span class="material-icons-outlined">rocket_launch</span>My PWA</h1>
-    <p>Fast • Offline • Notifications Enabled</p>
+    <p>Offline • Push Notifications Enabled</p>
   </header>
 
   <main>
@@ -69,19 +63,17 @@
   </main>
 
   <footer>
-    <span class="material-icons-outlined">copyright</span>
-    2026 My PWA App
+    <span class="material-icons-outlined">copyright</span> 2026 My PWA App
   </footer>
-
 </div>
 
 <script type="module">
-  // -------------------------------
-  // Firebase Initialization
-  // -------------------------------
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js";
 
+  // -------------------
+  // Firebase Config
+  // -------------------
   const firebaseConfig = {
     apiKey: "AIzaSyCPSfmHJwV_1MNNeBF3obnpWaK0jDea6lE",
     authDomain: "dev-a-3cf61.firebaseapp.com",
@@ -96,18 +88,18 @@
   const app = initializeApp(firebaseConfig);
   const messaging = getMessaging(app);
 
-  // -------------------------------
-  // Register Firebase SW
-  // -------------------------------
+  // -------------------
+  // Register SW
+  // -------------------
   if('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
-      .then(() => console.log("✅ FCM SW registered"))
+      .then(() => console.log("✅ FCM Service Worker registered"))
       .catch(err => console.error("❌ FCM SW error:", err));
   }
 
-  // -------------------------------
-  // Ask notification permission on page load
-  // -------------------------------
+  // -------------------
+  // Request Notification Permission
+  // -------------------
   window.addEventListener('load', async () => {
     if(Notification.permission === 'default') {
       const permission = await Notification.requestPermission();
@@ -119,9 +111,9 @@
     }
   });
 
-  // -------------------------------
-  // Get FCM token
-  // -------------------------------
+  // -------------------
+  // Get FCM Token
+  // -------------------
   async function getFCMToken() {
     try {
       const token = await getToken(messaging, {
@@ -129,7 +121,7 @@
       });
       if(token) {
         console.log("🔥 FCM Token:", token);
-        // Send this token to your backend to send push notifications
+        // Save this token on your server to send notifications
       } else {
         console.log("No token available. Request permission first.");
       }
@@ -140,9 +132,9 @@
 
   getFCMToken();
 
-  // -------------------------------
-  // Handle foreground messages
-  // -------------------------------
+  // -------------------
+  // Handle Foreground Messages
+  // -------------------
   onMessage(messaging, (payload) => {
     console.log("Foreground message:", payload);
     alert(`Foreground notification: ${payload.notification.title} - ${payload.notification.body}`);
