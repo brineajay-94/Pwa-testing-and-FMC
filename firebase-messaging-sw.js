@@ -1,7 +1,7 @@
 importScripts("https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging.js");
 
-// Initialize Firebase inside SW
+// Initialize Firebase in SW
 firebase.initializeApp({
   apiKey: "AIzaSyCPSfmHJwV_1MNNeBF3obnpWaK0jDea6lE",
   authDomain: "dev-a-3cf61.firebaseapp.com",
@@ -14,8 +14,8 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Show notification when app is in background or closed
-messaging.onBackgroundMessage((payload) => {
+// Handle background messages
+messaging.onBackgroundMessage(payload => {
   self.registration.showNotification(payload.notification.title, {
     body: payload.notification.body,
     icon: payload.notification.icon || "/icons/icon-192x192.png"
